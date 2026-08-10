@@ -75,53 +75,18 @@ class AskRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────
 @app.get("/health")
 def health():
-    import os
-    env_keys = list(os.environ.keys())
-    error_msg = None
-    redis_client_status = "untested"
-    redis_client_error = None
-    redis_scheme = "none"
-    redis_ping_status = "untested"
-    redis_ping_error = None
-    try:
-        settings = get_settings()
-        config_status = "ok"
-        url = settings.redis_url
-        if "://" in url:
-            redis_scheme = url.split("://")[0]
-        else:
-            redis_scheme = "no_scheme_found"
-        try:
-            client = get_redis_client()
-            redis_client_status = "ok"
-            try:
-                client.ping()
-                redis_ping_status = "ok"
-            except Exception as e_ping:
-                redis_ping_status = "error"
-                redis_ping_error = str(e_ping)
-        except Exception as e_redis:
-            redis_client_status = "error"
-            redis_client_error = str(e_redis)
-    except Exception as e:
-        config_status = "error"
-        error_msg = str(e)
-    
+    """Liveness probe — process còn sống không?
+
+    - Đang tắt dần (``lifecycle.shutting_down``) → 503 shutting_down
+    - Bình thường → 200 ok
+
+    Endpoint này phải **nhẹ**: không gọi Redis, không query DB. Nó chỉ trả
+    lời câu hỏi "có cần restart container này không?". Nếu nó phụ thuộc
+    Redis, Redis chết một nhịp là cả cụm container bị restart theo.
+    """
     if lifecycle.shutting_down:
         return JSONResponse(status_code=503, content={"status": "shutting_down"})
-    return {
-        "status": "ok",
-        "service": SERVICE_NAME,
-        "version": SERVICE_VERSION,
-        "config_status": config_status,
-        "error_msg": error_msg,
-        "redis_client_status": redis_client_status,
-        "redis_client_error": redis_client_error,
-        "redis_scheme": redis_scheme,
-        "redis_ping_status": redis_ping_status,
-        "redis_ping_error": redis_ping_error,
-        "env_keys": [k for k in env_keys if k.upper() in ["PORT", "AGENT_API_KEY", "REDIS_URL", "RATE_LIMIT_PER_MINUTE", "MONTHLY_BUDGET_USD", "LOG_LEVEL"]]
-    }
+    return {"status": "ok", "service": SERVICE_NAME, "version": SERVICE_VERSION}
 
 
 @app.get("/ready")
