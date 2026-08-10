@@ -26,6 +26,15 @@ def get_redis_client(url: str | None = None):
     trong process, đúng cái mà CP4 đang tìm cách loại bỏ.
     """
     url = url or get_settings().redis_url
+    
+    # Tự động sửa lỗi nếu người dùng dán nhầm toàn bộ lệnh redis-cli
+    if "redis-cli" in url:
+        for prefix in ["rediss://", "redis://"]:
+            idx = url.find(prefix)
+            if idx != -1:
+                url = url[idx:].strip()
+                break
+
     if url.startswith("fake://"):
         import fakeredis
 
