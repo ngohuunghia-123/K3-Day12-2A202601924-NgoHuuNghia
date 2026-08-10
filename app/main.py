@@ -75,18 +75,26 @@ class AskRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────
 @app.get("/health")
 def health():
-    """Liveness probe — process còn sống không?
-
-    - Đang tắt dần (``lifecycle.shutting_down``) → 503 shutting_down
-    - Bình thường → 200 ok
-
-    Endpoint này phải **nhẹ**: không gọi Redis, không query DB. Nó chỉ trả
-    lời câu hỏi "có cần restart container này không?". Nếu nó phụ thuộc
-    Redis, Redis chết một nhịp là cả cụm container bị restart theo.
-    """
+    import os
+    env_keys = list(os.environ.keys())
+    error_msg = None
+    try:
+        settings = get_settings()
+        config_status = "ok"
+    except Exception as e:
+        config_status = "error"
+        error_msg = str(e)
+    
     if lifecycle.shutting_down:
         return JSONResponse(status_code=503, content={"status": "shutting_down"})
-    return {"status": "ok", "service": SERVICE_NAME, "version": SERVICE_VERSION}
+    return {
+        "status": "ok",
+        "service": SERVICE_NAME,
+        "version": SERVICE_VERSION,
+        "config_status": config_status,
+        "error_msg": error_msg,
+        "env_keys": [k for k in env_keys if k.upper() in ["PORT", "AGENT_API_KEY", "REDIS_URL", "RATE_LIMIT_PER_MINUTE", "MONTHLY_BUDGET_USD", "LOG_LEVEL"]]
+    }
 
 
 @app.get("/ready")
