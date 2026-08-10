@@ -80,9 +80,15 @@ def health():
     error_msg = None
     redis_client_status = "untested"
     redis_client_error = None
+    redis_scheme = "none"
     try:
         settings = get_settings()
         config_status = "ok"
+        url = settings.redis_url
+        if "://" in url:
+            redis_scheme = url.split("://")[0]
+        else:
+            redis_scheme = "no_scheme_found"
         try:
             client = get_redis_client()
             redis_client_status = "ok"
@@ -103,6 +109,7 @@ def health():
         "error_msg": error_msg,
         "redis_client_status": redis_client_status,
         "redis_client_error": redis_client_error,
+        "redis_scheme": redis_scheme,
         "env_keys": [k for k in env_keys if k.upper() in ["PORT", "AGENT_API_KEY", "REDIS_URL", "RATE_LIMIT_PER_MINUTE", "MONTHLY_BUDGET_USD", "LOG_LEVEL"]]
     }
 
