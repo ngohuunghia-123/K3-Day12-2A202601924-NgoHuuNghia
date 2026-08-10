@@ -35,6 +35,10 @@ def get_redis_client(url: str | None = None):
                 url = url[idx:].strip()
                 break
 
+    # Tự động nâng cấp lên rediss:// nếu kết nối đến Upstash (yêu cầu TLS)
+    if "upstash.io" in url and url.startswith("redis://"):
+        url = url.replace("redis://", "rediss://", 1)
+
     if url.startswith("fake://"):
         import fakeredis
 
