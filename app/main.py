@@ -81,6 +81,8 @@ def health():
     redis_client_status = "untested"
     redis_client_error = None
     redis_scheme = "none"
+    redis_ping_status = "untested"
+    redis_ping_error = None
     try:
         settings = get_settings()
         config_status = "ok"
@@ -92,6 +94,12 @@ def health():
         try:
             client = get_redis_client()
             redis_client_status = "ok"
+            try:
+                client.ping()
+                redis_ping_status = "ok"
+            except Exception as e_ping:
+                redis_ping_status = "error"
+                redis_ping_error = str(e_ping)
         except Exception as e_redis:
             redis_client_status = "error"
             redis_client_error = str(e_redis)
@@ -110,6 +118,8 @@ def health():
         "redis_client_status": redis_client_status,
         "redis_client_error": redis_client_error,
         "redis_scheme": redis_scheme,
+        "redis_ping_status": redis_ping_status,
+        "redis_ping_error": redis_ping_error,
         "env_keys": [k for k in env_keys if k.upper() in ["PORT", "AGENT_API_KEY", "REDIS_URL", "RATE_LIMIT_PER_MINUTE", "MONTHLY_BUDGET_USD", "LOG_LEVEL"]]
     }
 
