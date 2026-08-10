@@ -10,17 +10,17 @@
 
 | Mục | Nội dung |
 |-----|----------|
-| Họ và tên | (điền họ tên) |
-| Mã học viên | (điền mã học viên) |
-| Repo | (điền link repo DAY12-...) |
+| Họ và tên | Ngô Hữu Nghĩa |
+| Mã học viên | 2A202601924 |
+| Repo | https://github.com/ngohuunghia/K3-Day12-2A202601924-NgoHuuNghia |
 
 ## Service
 
 | Mục | Nội dung |
 |-----|----------|
-| Public URL | https://TODO-thay-bang-url-that.up.railway.app |
-| Platform | Railway / Render / Cloud Run — (điền platform bạn dùng) |
-| Ngày deploy | (điền ngày) |
+| Public URL | https://k3-day12-2a202601924-ngohuunghia.onrender.com |
+| Platform | Render + Upstash Redis |
+| Ngày deploy | 2026-08-10 |
 
 ## Biến Môi Trường Đã Set Trên Cloud
 
@@ -29,8 +29,8 @@ Ghi tên biến và **nguồn giá trị**, không ghi giá trị:
 | Biến | Đã set | Ghi chú |
 |------|--------|---------|
 | `PORT` | ✅ | platform tự gán |
-| `AGENT_API_KEY` | ✅ | đặt trong dashboard, không nằm trong repo |
-| `REDIS_URL` | ✅ | (điền: Redis add-on của platform / Upstash / ...) |
+| `AGENT_API_KEY` | ✅ | đặt trong dashboard Render, trùng khớp với LOCAL_FALLBACK |
+| `REDIS_URL` | ✅ | URL kết nối TLS dạng rediss://... lấy từ Upstash |
 | `RATE_LIMIT_PER_MINUTE` | ✅ | 10 |
 | `MONTHLY_BUDGET_USD` | ✅ | 10.0 |
 | `LOG_LEVEL` | ✅ | INFO |
@@ -73,7 +73,9 @@ done; echo
 Dán output của các lệnh trên vào đây:
 
 ```
-(điền output)
+curl -i https://k3-day12-2a202601924-ngohuunghia.onrender.com/health  → 200 {"status":"ok","service":"day12-agent","version":"1.0.0"}
+curl -i https://k3-day12-2a202601924-ngohuunghia.onrender.com/ready   → 200 {"status":"ready","redis":true}
+curl -i -X POST https://k3-day12-2a202601924-ngohuunghia.onrender.com/ask (không key) → 401 {"detail":"invalid or missing API key"}
 ```
 
 ## Ảnh Chụp Màn Hình
@@ -97,5 +99,5 @@ Không đăng ký được tài khoản cloud? Vẫn nộp được bài, nhưng
 5. Ghi rõ lý do không deploy được vào phần dưới đây:
 
 ```
-(điền lý do nếu dùng phương án dự phòng, ngược lại xóa mục này)
+(đã deploy thành công lên Render + Upstash, không sử dụng phương án dự phòng)
 ```
